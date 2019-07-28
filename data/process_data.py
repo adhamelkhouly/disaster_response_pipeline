@@ -23,7 +23,25 @@ def clean_data(df):
 
     Returns: pd.DataFrame
     """
-    pass
+    # Split the category column into multiple columns to a new DataFrame
+    df_categories = df['categories'].str.split(';', expand=True)
+
+    # Extracting first row to grab column names, and renaming DataFrame columns
+    first_row = df_categories.iloc[0]
+    column_names = [x[:-2] for x in first_row]
+    df_categories.columns = column_names
+
+    # Clean all columns to just contain a number 1 or 0
+    df_categories = df_categories.applymap(lambda x: int(x[-1:]))
+    df.drop(columns=['categories'], inplace=True)
+    df = pd.concat([df, df_categories], axis=1)
+
+    # Dropping the original common, as the original message is not very useful
+    # in classification, and many of those entries is null
+    df.drop(columns=['original'], inplace=True)
+
+    return df
+
 
 def save_data(df, database_filename):
     """
