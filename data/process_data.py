@@ -1,25 +1,54 @@
 import sys
+import pandas as pd
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    """
+    Args:
+        messages_filepath (str): filepath to messages csv file
+        categories_filepath(str): filepath to categories csv file
+
+    Returns: pd.DataFrame
+    """
+    df_messages = pd.read_csv(messages_filepath)
+    df_categories = pd.read_csv(categories_filepath)['categories']
+    df_merge = df_messages.merge(df_categories, how='outer', on=['id'])
+    return df_merge
 
 
 def clean_data(df):
+    """
+    Args:
+        df(pd.DataFrame): raw DataFrame to clean and process
+
+    Returns: pd.DataFrame
+    """
     pass
 
-
 def save_data(df, database_filename):
+    """
+    Args:
+        df(pd.DataFrame): pandas DataFrame to save to a database file
+        database_filename(str): path to database filename
+
+    Returns: None
+    """
     pass  
 
 
 def main():
+    """
+    Main function controlling script for processing input data and saving it
+    to a database file.
+
+    Returns: None
+    """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
 
-        print('Loading data...\n    MESSAGES: {}\n    CATEGORIES: {}'
-              .format(messages_filepath, categories_filepath))
+        print('Loading data...\n    MESSAGES: {}\n    CATEGORIES: {}'.format(
+            messages_filepath, categories_filepath))
         df = load_data(messages_filepath, categories_filepath)
 
         print('Cleaning data...')
@@ -31,11 +60,11 @@ def main():
         print('Cleaned data saved to database!')
     
     else:
-        print('Please provide the filepaths of the messages and categories '\
-              'datasets as the first and second argument respectively, as '\
-              'well as the filepath of the database to save the cleaned data '\
-              'to as the third argument. \n\nExample: python process_data.py '\
-              'disaster_messages.csv disaster_categories.csv '\
+        print('Please provide the filepaths of the messages and categories '
+              'datasets as the first and second argument respectively, as '
+              'well as the filepath of the database to save the cleaned data '
+              'to as the third argument. \n\nExample: python process_data.py '
+              'disaster_messages.csv disaster_categories.csv '
               'DisasterResponse.db')
 
 
