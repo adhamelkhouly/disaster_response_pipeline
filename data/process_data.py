@@ -5,6 +5,8 @@ from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
     """
+    Loads data from two CSV files and merges them on id
+
     Args:
         messages_filepath (str): filepath to messages csv file
         categories_filepath(str): filepath to categories csv file
@@ -19,6 +21,12 @@ def load_data(messages_filepath, categories_filepath):
 
 def clean_data(df):
     """
+    Cleans data by:
+        - removing duplicates
+        - splitting entries into columns
+        - removing unnecessary columns
+        - casting values to their correct types
+
     Args:
         df(pd.DataFrame): raw DataFrame to clean and process
 
@@ -37,15 +45,18 @@ def clean_data(df):
     df.drop(columns=['categories'], inplace=True)
     df = pd.concat([df, df_categories], axis=1)
 
-    # Dropping the original common, as the original message is not very useful
+    # Dropping the original column, as the original message is not very useful
     # in classification, and many of those entries is null
-    df.drop(columns=['original'], inplace=True)
+    # Dropping the genre column as it does not affect the classification
+    df.drop(columns=['original', 'genre'], inplace=True)
 
     return df
 
 
 def save_data(df, database_filename):
     """
+    Saves a pd.DataFrame to a database file using SQLAlchemy
+
     Args:
         df(pd.DataFrame): pandas DataFrame to save to a database file
         database_filename(str): path to database filename
