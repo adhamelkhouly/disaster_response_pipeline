@@ -42,6 +42,8 @@ def clean_data(df):
 
     # Clean all columns to just contain a number 1 or 0
     df_categories = df_categories.applymap(lambda x: int(x[-1:]))
+    df_categories.related = df_categories.related.apply(
+        lambda x: 1 if x == 2 else 0)  # related column contains value of 2
     df.drop(columns=['categories'], inplace=True)
     df = pd.concat([df, df_categories], axis=1)
 
@@ -64,6 +66,7 @@ def save_data(df, database_filename):
     Returns: None
     """
     engine = create_engine('sqlite:///{}.db'.format(database_filename))
+    engine.execute('DROP TABLE IF EXISTS response')
     df.to_sql('response', engine, index=False)
 
 
