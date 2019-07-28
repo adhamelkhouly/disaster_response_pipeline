@@ -12,7 +12,7 @@ def load_data(messages_filepath, categories_filepath):
     Returns: pd.DataFrame
     """
     df_messages = pd.read_csv(messages_filepath)
-    df_categories = pd.read_csv(categories_filepath)['categories']
+    df_categories = pd.read_csv(categories_filepath)
     df_merge = df_messages.merge(df_categories, how='outer', on=['id'])
     return df_merge
 
