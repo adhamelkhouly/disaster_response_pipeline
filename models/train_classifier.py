@@ -2,9 +2,6 @@ import sys
 import re
 import pandas as pd
 from sqlalchemy import create_engine
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -12,6 +9,13 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+import nltk
+nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger', 'stopwords'])
 
 
 def load_data(database_filepath):
@@ -68,7 +72,17 @@ def build_model():
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
 
-    return pipeline
+    parameters = {
+        'clf__estimator__n_estimators': [300, 500, 700],
+        'clf__estimator__max_depth': [8, 9, 10, 11, 12],
+        'clf__estimator__random_state': [7],
+        'clf__estimator__max_features': ['auto', 'sqrt', 'log2'],
+        'clf__estimator__min_samples_leaf': [25, 50],
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -83,7 +97,9 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
     Returns: None
     """
-    pass
+    y_pred = model.predict(X_test)
+    print(classification_report(Y_test.values, y_pred,
+                                target_names=category_names))
 
 
 def save_model(model, model_filepath):
