@@ -52,7 +52,7 @@ def tokenize(text):
     Normalizes and tokenizes messages
 
     Args:
-        text:
+        text(str): string to be tokenized
 
     Returns:
     """
@@ -124,12 +124,11 @@ def save_model(model, model_filepath, most_common_words):
     Saves the model to a pickle file
 
     Args:
-        model:
-        model_filepath:
-        most_common_words:
+        model(GridSearchCV): a pipeline or ml model
+        model_filepath: filename for pickle file
+        most_common_words: most common words in dataset to be pickled
 
     Returns:
-
     """
     with open(model_filepath, 'wb') as f:
         pickle.dump((model, most_common_words), f)
