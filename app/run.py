@@ -44,40 +44,12 @@ def tokenize(text):
     return clean_tokens
 
 
+
+
+
 def plot1(df):
     """
-    Graph 1 of the categorical count
-
-    Args:
-        df (pd.DataFrame): loaded DataFrame from database file
-
-    Returns: dict
-    """
-    categories_count = df[df.columns[4:]].sum(axis=0)
-    graph = {
-        'data': [
-            go.Bar(
-                x=df.columns[3:],
-                y=categories_count
-            )
-        ],
-
-        'layout': {
-            'title': 'Distribution of Message Categories',
-            'yaxis': {
-                'title': "Count"
-            },
-            'xaxis': {
-                'title': "Category"
-            }
-        }
-    }
-    return graph
-
-
-def plot2(df):
-    """
-    Graph 2 of the top words used
+    Graph 1 of the top words used
 
     Args:
         df (pd.DataFrame): loaded DataFrame from database file
@@ -105,6 +77,37 @@ def plot2(df):
             },
             'xaxis': {
                 'title': "Word"
+            }
+        }
+    }
+    return graph
+
+
+def plot2(df):
+    """
+    Graph 2 of the categorical count
+
+    Args:
+        df (pd.DataFrame): loaded DataFrame from database file
+
+    Returns: dict
+    """
+    categories_count = df[df.columns[4:]].sum(axis=0)
+    graph = {
+        'data': [
+            go.Bar(
+                x=df.columns[3:],
+                y=categories_count
+            )
+        ],
+
+        'layout': {
+            'title': 'Distribution of Message Categories',
+            'yaxis': {
+                'title': "Count"
+            },
+            'xaxis': {
+                'title': "Category"
             }
         }
     }
@@ -154,7 +157,44 @@ def plot4(df):
 
     Returns: dict
     """
-    pass
+    genres = df.groupby('genre').sum()
+    genre_names = list(genres.index)
+
+    categories = list(df.columns[4:])
+    categories_values = genres.values
+
+    graph = {
+        'data': [
+            go.Bar(
+                name=genre_names[0],
+                x=categories,
+                y=categories_values[0][1:]
+            ),
+            go.Bar(
+                name=genre_names[1],
+                x=categories,
+                y=categories_values[1][1:]
+            ),
+            go.Bar(
+                name=genre_names[2],
+                x=categories,
+                y=categories_values[2][1:]
+            )
+        ],
+
+        'layout': {
+            'title': 'Distribution of Message Genres',
+            'yaxis': {
+                'title': "Count"
+            },
+            'xaxis': {
+                'title': "Genre"
+            },
+            'barmode': 'stack'
+        }
+    }
+
+    return graph
 
 
 # load data
@@ -168,33 +208,8 @@ model = joblib.load("../models/classifier.pkl")
 @app.route('/')
 @app.route('/index')
 def index():
-    
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
-    
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
-        {
-            'data': [
-                go.Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
-
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
+        plot1(df),
     ]
     
     # encode plotly graphs in JSON
