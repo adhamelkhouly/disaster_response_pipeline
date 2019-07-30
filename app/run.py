@@ -6,12 +6,11 @@ import re
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from nltk import FreqDist
 
 
 from flask import Flask
 from flask import render_template, request, jsonify
-import plotly.graph_objects as go
+import plotly.graph_objects as pygo
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -44,9 +43,6 @@ def tokenize(text):
     return clean_tokens
 
 
-
-
-
 def plot1(df):
     """
     Graph 1 of the top words used
@@ -56,17 +52,11 @@ def plot1(df):
 
     Returns: dict
     """
-    messages = df['message'].values.tolist()
-    text = ' '.join(messages)
-    text = tokenize(text)
-    dist = FreqDist(w for w in text)
-    most_common = dict(dist.most_common(10))
-
     graph = {
         'data': [
-            go.Bar(
-                x=most_common.keys(),
-                y=most_common.values()
+            pygo.Bar(
+                x=list(most_common_words.keys()),
+                y=list(most_common_words.values())
             )
         ],
 
@@ -92,10 +82,10 @@ def plot2(df):
 
     Returns: dict
     """
-    categories_count = df[df.columns[4:]].sum(axis=0)
+    categories_count = df[df.columns[3:]].sum(axis=0)
     graph = {
         'data': [
-            go.Bar(
+            pygo.Bar(
                 x=df.columns[3:],
                 y=categories_count
             )
@@ -128,7 +118,7 @@ def plot3(df):
 
     graph = {
             'data': [
-                go.Bar(
+                pygo.Bar(
                     x=genre_names,
                     y=genre_counts
                 )
@@ -160,22 +150,23 @@ def plot4(df):
     genres = df.groupby('genre').sum()
     genre_names = list(genres.index)
 
-    categories = list(df.columns[4:])
+    categories = df.columns[3:]
     categories_values = genres.values
+    print(genres.values)
 
     graph = {
         'data': [
-            go.Bar(
+            pygo.Bar(
                 name=genre_names[0],
                 x=categories,
                 y=categories_values[0][1:]
             ),
-            go.Bar(
+            pygo.Bar(
                 name=genre_names[1],
                 x=categories,
                 y=categories_values[1][1:]
             ),
-            go.Bar(
+            pygo.Bar(
                 name=genre_names[2],
                 x=categories,
                 y=categories_values[2][1:]
@@ -183,12 +174,9 @@ def plot4(df):
         ],
 
         'layout': {
-            'title': 'Distribution of Message Genres',
+            'title': 'Distribution of Categories Per Genre',
             'yaxis': {
                 'title': "Count"
-            },
-            'xaxis': {
-                'title': "Genre"
             },
             'barmode': 'stack'
         }
@@ -202,7 +190,7 @@ engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('response', engine)
 
 # load model
-model = joblib.load("../models/classifier.pkl")
+model, most_common_words = joblib.load("../models/model.pkl")
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -210,6 +198,9 @@ model = joblib.load("../models/classifier.pkl")
 def index():
     graphs = [
         plot1(df),
+        plot2(df),
+        plot3(df),
+        plot4(df)
     ]
     
     # encode plotly graphs in JSON
@@ -228,7 +219,7 @@ def go():
 
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
-    classification_results = dict(zip(df.columns[4:], classification_labels))
+    classification_results = dict(zip(df.columns[3:], classification_labels))
 
     # This will render the go.html Please see that file. 
     return render_template(
