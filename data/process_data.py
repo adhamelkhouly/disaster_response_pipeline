@@ -15,7 +15,7 @@ def load_data(messages_filepath, categories_filepath):
     """
     df_messages = pd.read_csv(messages_filepath)
     df_categories = pd.read_csv(categories_filepath)
-    df_merge = df_messages.merge(df_categories, how='outer', on=['id'])
+    df_merge = pd.merge(df_messages, df_categories, on='id')
     return df_merge
 
 
@@ -51,6 +51,8 @@ def clean_data(df):
     # in classification, and many of those entries is null
     # Dropping the genre column as it does not affect the classification
     df.drop(columns=['original'], inplace=True)
+
+    df = df.drop_duplicates(keep='first')
 
     return df
 
