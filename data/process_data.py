@@ -50,7 +50,7 @@ def clean_data(df):
     # Dropping the original column, as the original message is not very useful
     # in classification, and many of those entries is null
     # Dropping the genre column as it does not affect the classification
-    df.drop(columns=['original', 'genre'], inplace=True)
+    df.drop(columns=['original'], inplace=True)
 
     return df
 
