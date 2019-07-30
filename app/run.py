@@ -152,7 +152,6 @@ def plot4(df):
 
     categories = df.columns[3:]
     categories_values = genres.values
-    print(genres.values)
 
     graph = {
         'data': [
